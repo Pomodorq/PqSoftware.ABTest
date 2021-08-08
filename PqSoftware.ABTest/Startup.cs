@@ -22,6 +22,10 @@ namespace PqSoftware.ABTest
             {
                 app.UseDeveloperExceptionPage();
             }
+            else
+            {
+                app.UseHttpsRedirection();
+            }
 
             app.UseRouting();
 
