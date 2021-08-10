@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PqSoftware.ABTest.Data;
+using PqSoftware.ABTest.Services;
 
 namespace PqSoftware.ABTest
 {
@@ -24,6 +25,8 @@ namespace PqSoftware.ABTest
             services.AddDbContext<ApplicationContext>(options => options.UseNpgsql(connection));
 
             services.AddScoped<IDataRepository, DataRepository>();
+            services.AddTransient<IUsersLifetimeService, UsersLifetimeService>();
+            services.AddTransient<IRollingRetentionService, RollingRetentionService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

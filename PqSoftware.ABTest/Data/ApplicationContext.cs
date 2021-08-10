@@ -14,6 +14,8 @@ namespace PqSoftware.ABTest.Data
         public ApplicationContext(DbContextOptions<ApplicationContext> options)
             : base(options)
         {
+            //Database.EnsureDeleted();
+            //Database.EnsureCreated();
         }
     }
 }
