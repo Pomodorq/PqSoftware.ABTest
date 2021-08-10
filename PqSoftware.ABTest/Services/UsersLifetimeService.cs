@@ -24,54 +24,58 @@ namespace PqSoftware.ABTest.Services
                                     "order by lifetime; ").ToListAsync();
             return lifetimeCounts;
         }
-
-        public async Task<IEnumerable<LifetimeIntervalCount>> GetUsersLifetimeDistributionByIntervals(int intervalsNumber = -1)
+        public async Task<IList<LifetimeIntervalCount>> GetUsersLifetimeDistributionByIntervals()
         {
             var lifetimeCounts = await GetUsersLifetimeDistributionRaw();
+
+            var lifetimeIntervalCounts = new List<LifetimeIntervalCount>();
+
             if (lifetimeCounts.Count == 0)
             {
-                return new List<LifetimeIntervalCount>();
+                return lifetimeIntervalCounts;
             }
+            if (lifetimeCounts.Count == 1)
+            {
+                lifetimeIntervalCounts.Add(new LifetimeIntervalCount()
+                {
+                    LifetimeInterval = lifetimeCounts[0].Lifetime.ToString(),
+                    Count = lifetimeCounts[0].Count
+                });
+                return lifetimeIntervalCounts;
+            }
+
             int minLifetime = lifetimeCounts.First().Lifetime;
             int maxLifetime = lifetimeCounts.Last().Lifetime;
             int range = maxLifetime - minLifetime;
             int numberOfIntervals = 1 + (int)Math.Truncate(Math.Log2(lifetimeCounts.Count()));
-            int daysInInterval = (int)Math.Ceiling((decimal)range / numberOfIntervals);
-            
-            var lifetimeIntervalCounts = new List<LifetimeIntervalCount>();
-            int i = 0;
-            int left = minLifetime;
-            int right = left + daysInInterval - 1;
-            while (left <= maxLifetime)
+            int interval = (int)Math.Ceiling((decimal)range / numberOfIntervals);
+
+            for (int i = 0; i < numberOfIntervals; ++i)
             {
-                if (right > maxLifetime) right = maxLifetime;
-
-                int counter = 0;
-                while (i < lifetimeCounts.Count && lifetimeCounts[i].Lifetime <= right)
-                {
-                    counter += lifetimeCounts[i].Count;
-                    i++;
-                }
-
+                var left = minLifetime + i * interval;
+                var right = Math.Min(left + interval - 1, maxLifetime);
                 lifetimeIntervalCounts.Add(new LifetimeIntervalCount()
                 {
-                    LifetimeInterval = $"{left}-{right}",
-                    Count = counter
+                    LifetimeInterval = left == right ? $"{left}" : $"{left}-{right}",
+                    Count = 0
                 });
-                left += daysInInterval;
-                right += daysInInterval;
+            }
+
+            foreach (var ltCount in lifetimeCounts)
+            {
+                var k = (int)Math.Truncate((double)(ltCount.Lifetime - minLifetime) / interval);
+                lifetimeIntervalCounts[k].Count += ltCount.Count;
             }
 
             return lifetimeIntervalCounts;
         }
-        public async Task<IEnumerable<LifetimeIntervalCount>> GetUsersLifetimeDistributionByRange()
+
+        public async Task<IList<LifetimeIntervalCount>> GetUsersLifetimeDistributionByRange()
         {
             var lifetimeCounts = await GetUsersLifetimeDistributionRaw();
-            int minLifetime = lifetimeCounts.First().Lifetime;
             int maxLifetime = lifetimeCounts.Last().Lifetime;
-            int range = maxLifetime - minLifetime;
 
-            List<LifetimeIntervalCount> lifetimeIntervalCounts = Enumerable.Range(0, maxLifetime)
+            List<LifetimeIntervalCount> lifetimeIntervalCounts = Enumerable.Range(0, maxLifetime + 1)
                 .Select(x => new LifetimeIntervalCount()
                 {
                     LifetimeInterval = x.ToString(),
