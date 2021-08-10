@@ -22,6 +22,8 @@ namespace PqSoftware.ABTest
 
             string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<ApplicationContext>(options => options.UseNpgsql(connection));
+
+            services.AddScoped<IDataRepository, DataRepository>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

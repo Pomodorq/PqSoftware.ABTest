@@ -15,9 +15,9 @@ namespace PqSoftware.ABTest.Data
             _context = context;
         }
 
-        public Task<User> GetUser(int id)
+        public async Task<User> GetUser(int id)
         {
-            throw new NotImplementedException();
+            return await _context.Users.FirstOrDefaultAsync(x => x.UserId == id);
         }
 
         public async Task<IEnumerable<User>> GetUsers()
@@ -25,14 +25,18 @@ namespace PqSoftware.ABTest.Data
             return await _context.Users.ToListAsync();
         }
 
-        public Task<User> PostUser(User user)
+        public async Task<User> PostUser(User user)
         {
-            throw new NotImplementedException();
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+            return user;
         }
 
-        public Task<IEnumerable<User>> PostUsers(IEnumerable<User> users)
+        public async Task<IEnumerable<User>> PostUsers(IEnumerable<User> users)
         {
-            throw new NotImplementedException();
+            _context.Users.AddRange(users);
+            await _context.SaveChangesAsync();
+            return users;
         }
     }
 }
