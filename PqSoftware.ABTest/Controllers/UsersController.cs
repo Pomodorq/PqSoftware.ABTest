@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace PqSoftware.ABTest.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
         private readonly IDataRepository _dataRepository;
@@ -51,10 +51,10 @@ namespace PqSoftware.ABTest.Controllers
         }
 
         [HttpPost("many")]
-        public async Task<IEnumerable<User>> PostUsers(IEnumerable<User> users)
+        public async Task<ActionResult> PostUsers(IEnumerable<User> users)
         {
             var createdUsers = await _dataRepository.PostUsers(users);
-            return createdUsers;
+            return Ok();
         }
 
         [HttpGet("distribution")]
