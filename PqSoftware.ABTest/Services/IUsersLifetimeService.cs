@@ -8,8 +8,8 @@ namespace PqSoftware.ABTest.Services
 {
     public interface IUsersLifetimeService
     {
-        Task<IList<LifetimeCount>> GetUsersLifetimeDistributionRaw();
-        Task<IList<LifetimeIntervalCount>> GetUsersLifetimeDistributionByIntervals();
-        Task<IList<LifetimeIntervalCount>> GetUsersLifetimeDistributionByRange();
+        Task<IList<LifetimeCount>> GetUsersLifetimeDistributionRaw(int projectId);
+        Task<IList<LifetimeIntervalCount>> GetUsersLifetimeDistributionByIntervals(int projectId);
+        Task<IList<LifetimeIntervalCount>> GetUsersLifetimeDistributionByRange(int projectId);
     }
 }

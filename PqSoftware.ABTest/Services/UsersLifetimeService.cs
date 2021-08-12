@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using PqSoftware.ABTest.Data;
 using PqSoftware.ABTest.Data.Models;
 using System;
@@ -15,18 +16,20 @@ namespace PqSoftware.ABTest.Services
         {
             _context = context;
         }
-        public async Task<IList<LifetimeCount>> GetUsersLifetimeDistributionRaw()
+        public async Task<IList<LifetimeCount>> GetUsersLifetimeDistributionRaw(int projectId)
         {
+            NpgsqlParameter param = new NpgsqlParameter("@projectId", projectId);
             var lifetimeCounts = await _context.LifetimeCounts
                 .FromSqlRaw("select EXTRACT(day from \"DateLastActivity\" - \"DateRegistration\") :: integer lifetime, " +
-                                    "COUNT(*) from public.\"Users\" " +
+                                    "COUNT(*) from public.\"ProjectUsers\" " +
+                                    "where \"ProjectId\" = @projectId " +
                                     "group by lifetime " +
-                                    "order by lifetime; ").ToListAsync();
+                                    "order by lifetime; ", param).ToListAsync();
             return lifetimeCounts;
         }
-        public async Task<IList<LifetimeIntervalCount>> GetUsersLifetimeDistributionByIntervals()
+        public async Task<IList<LifetimeIntervalCount>> GetUsersLifetimeDistributionByIntervals(int projectId)
         {
-            var lifetimeCounts = await GetUsersLifetimeDistributionRaw();
+            var lifetimeCounts = await GetUsersLifetimeDistributionRaw(projectId);
 
             var lifetimeIntervalCounts = new List<LifetimeIntervalCount>();
 
@@ -70,9 +73,9 @@ namespace PqSoftware.ABTest.Services
             return lifetimeIntervalCounts;
         }
 
-        public async Task<IList<LifetimeIntervalCount>> GetUsersLifetimeDistributionByRange()
+        public async Task<IList<LifetimeIntervalCount>> GetUsersLifetimeDistributionByRange(int projectId)
         {
-            var lifetimeCounts = await GetUsersLifetimeDistributionRaw();
+            var lifetimeCounts = await GetUsersLifetimeDistributionRaw(projectId);
             int maxLifetime = lifetimeCounts.Last().Lifetime;
 
             List<LifetimeIntervalCount> lifetimeIntervalCounts = Enumerable.Range(0, maxLifetime + 1)
