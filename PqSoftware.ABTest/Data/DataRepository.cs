@@ -15,26 +15,36 @@ namespace PqSoftware.ABTest.Data
             _context = context;
         }
 
-        public async Task<User> GetUser(int id)
+        public async Task<IEnumerable<Project>> GetProjects()
         {
-            return await _context.Users.FirstOrDefaultAsync(x => x.UserId == id);
+            return await _context.Projects.AsNoTracking().ToListAsync();
         }
 
-        public async Task<IEnumerable<User>> GetUsers()
+        public async Task<Project> GetProject(int id)
         {
-            return await _context.Users.ToListAsync();
+            return await _context.Projects.AsNoTracking().FirstOrDefaultAsync(x => x.ProjectId == id);
         }
 
-        public async Task<User> PostUser(User user)
+        public async Task<bool> GetProjectUserExists(int projectId, int userId)
         {
-            _context.Users.Add(user);
+            return await _context.ProjectUsers.AnyAsync(x => x.ProjectId == projectId && x.UserId == userId);
+        }
+
+        public async Task<IEnumerable<ProjectUser>> GetProjectUsersByProject(int projectId)
+        {
+            return await _context.ProjectUsers.Where(x => x.ProjectId == projectId).AsNoTracking().ToListAsync();
+        }
+
+        public async Task<ProjectUser> PostProjectUser(ProjectUser user)
+        {
+            _context.ProjectUsers.Add(user);
             await _context.SaveChangesAsync();
             return user;
         }
 
-        public async Task<IEnumerable<User>> PostUsers(IEnumerable<User> users)
+        public async Task<IEnumerable<ProjectUser>> PostProjectUsers(IEnumerable<ProjectUser> users)
         {
-            _context.Users.AddRange(users);
+            _context.ProjectUsers.AddRange(users);
             await _context.SaveChangesAsync();
             return users;
         }

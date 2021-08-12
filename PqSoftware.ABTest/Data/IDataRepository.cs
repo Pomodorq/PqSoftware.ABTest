@@ -8,9 +8,11 @@ namespace PqSoftware.ABTest.Data
 {
     public interface IDataRepository
     {
-        Task<IEnumerable<User>> GetUsers();
-        Task<User> GetUser(int id);
-        Task<User> PostUser(User user);
-        Task<IEnumerable<User>> PostUsers(IEnumerable<User> users);
+        Task<IEnumerable<Project>> GetProjects();
+        Task<Project> GetProject(int id);
+        Task<bool> GetProjectUserExists(int projectId, int userId);
+        Task<IEnumerable<ProjectUser>> GetProjectUsersByProject(int projectId);
+        Task<ProjectUser> PostProjectUser(ProjectUser user);
+        Task<IEnumerable<ProjectUser>> PostProjectUsers(IEnumerable<ProjectUser> users);
     }
 }
