@@ -21,6 +21,12 @@ namespace PqSoftware.ABTest
         {
             services.AddControllers();
 
+            services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
+                  builder
+                   .AllowAnyMethod()
+                   .AllowAnyHeader()
+                   .WithOrigins(Configuration["AllowedCORS"])));
+
             string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<ApplicationContext>(options => options.UseNpgsql(connection));
 
@@ -41,6 +47,8 @@ namespace PqSoftware.ABTest
             }
 
             app.UseRouting();
+
+            app.UseCors("CorsPolicy");
 
             app.UseEndpoints(endpoints =>
             {
