@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using PqSoftware.ABTest.Data.Models;
 using System;
 using System.Collections.Generic;
@@ -47,6 +48,13 @@ namespace PqSoftware.ABTest.Data
             _context.ProjectUsers.AddRange(users);
             await _context.SaveChangesAsync();
             return users;
+        }
+
+        public async Task<int> DeleteProjectUsers(int projectId)
+        {
+            NpgsqlParameter param = new NpgsqlParameter("@projectId", projectId);
+            int numberDeletedUsers = await _context.Database.ExecuteSqlRawAsync("DELETE FROM public.\"ProjectUsers\" WHERE \"ProjectId\"=@projectId", param);
+            return numberDeletedUsers;
         }
     }
 }

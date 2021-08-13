@@ -111,5 +111,16 @@ namespace PqSoftware.ABTest.Controllers
         {
             return await _rollingRetentionService.CalculateRollingRetention(projectId, date, days);
         }
+        [HttpDelete("{projectId}/users")]
+        public async Task<ActionResult> DeleteProjectUsers(int projectId)
+        {
+            var project = await _dataRepository.GetProject(projectId);
+            if (project == null)
+            {
+                return NotFound();
+            }
+            await _dataRepository.DeleteProjectUsers(projectId);
+            return Ok();
+        }
     }
 }

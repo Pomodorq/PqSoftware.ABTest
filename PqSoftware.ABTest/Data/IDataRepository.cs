@@ -14,5 +14,6 @@ namespace PqSoftware.ABTest.Data
         Task<IEnumerable<ProjectUser>> GetProjectUsersByProject(int projectId);
         Task<ProjectUser> PostProjectUser(ProjectUser user);
         Task<IEnumerable<ProjectUser>> PostProjectUsers(IEnumerable<ProjectUser> users);
+        Task<int> DeleteProjectUsers(int projectId);
     }
 }
