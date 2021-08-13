@@ -30,6 +30,7 @@ namespace PqSoftware.ABTest.Services
         public async Task<IList<LifetimeIntervalCount>> GetUsersLifetimeDistributionByIntervals(int projectId)
         {
             var lifetimeCounts = await GetUsersLifetimeDistributionRaw(projectId);
+            var sumCount = await _context.ProjectUsers.Where(x => x.ProjectId == projectId).CountAsync();
 
             var lifetimeIntervalCounts = new List<LifetimeIntervalCount>();
 
@@ -50,13 +51,16 @@ namespace PqSoftware.ABTest.Services
             int minLifetime = lifetimeCounts.First().Lifetime;
             int maxLifetime = lifetimeCounts.Last().Lifetime;
             int range = maxLifetime - minLifetime;
-            int numberOfIntervals = 1 + (int)Math.Truncate(Math.Log2(lifetimeCounts.Count()));
+            int numberOfIntervals = 1 + (int)Math.Truncate(Math.Log2(sumCount));
             int interval = (int)Math.Ceiling((decimal)range / numberOfIntervals);
 
             for (int i = 0; i < numberOfIntervals; ++i)
             {
                 var left = minLifetime + i * interval;
-                var right = Math.Min(left + interval - 1, maxLifetime);
+                var right = (i == numberOfIntervals - 1) ?
+                    Math.Min(left + interval, maxLifetime) :
+                    left + interval - 1;
+                
                 lifetimeIntervalCounts.Add(new LifetimeIntervalCount()
                 {
                     LifetimeInterval = left == right ? $"{left}" : $"{left}-{right}",
@@ -67,6 +71,7 @@ namespace PqSoftware.ABTest.Services
             foreach (var ltCount in lifetimeCounts)
             {
                 var k = (int)Math.Truncate((double)(ltCount.Lifetime - minLifetime) / interval);
+                if (k == lifetimeIntervalCounts.Count) k--;
                 lifetimeIntervalCounts[k].Count += ltCount.Count;
             }
 
@@ -76,9 +81,11 @@ namespace PqSoftware.ABTest.Services
         public async Task<IList<LifetimeIntervalCount>> GetUsersLifetimeDistributionByRange(int projectId)
         {
             var lifetimeCounts = await GetUsersLifetimeDistributionRaw(projectId);
+            int minLifetime = lifetimeCounts.First().Lifetime;
             int maxLifetime = lifetimeCounts.Last().Lifetime;
+            int range = maxLifetime - minLifetime;
 
-            List<LifetimeIntervalCount> lifetimeIntervalCounts = Enumerable.Range(0, maxLifetime + 1)
+            List<LifetimeIntervalCount> lifetimeIntervalCounts = Enumerable.Range(minLifetime, range + 1)
                 .Select(x => new LifetimeIntervalCount()
                 {
                     LifetimeInterval = x.ToString(),
@@ -87,7 +94,7 @@ namespace PqSoftware.ABTest.Services
 
             foreach (var ltCount in lifetimeCounts)
             {
-                lifetimeIntervalCounts[ltCount.Lifetime].Count = ltCount.Count;
+                lifetimeIntervalCounts[ltCount.Lifetime - minLifetime].Count = ltCount.Count;
             }
 
             return lifetimeIntervalCounts;
