@@ -107,9 +107,9 @@ namespace PqSoftware.ABTest.Controllers
             return await _usersLifetimeService.GetUsersLifetimeDistributionByRange(projectId);
         }
         [HttpGet("{projectId}/users/rolling-retention")]
-        public async Task<double> GetRollingRetention(int projectId, DateTime date, int days)
+        public async Task<double> GetRollingRetention(int projectId, DateTime? date, int days)
         {
-            return await _rollingRetentionService.CalculateRollingRetention(projectId, date, days);
+            return await _rollingRetentionService.CalculateRollingRetention(projectId, days, date);
         }
         [HttpDelete("{projectId}/users")]
         public async Task<ActionResult> DeleteProjectUsers(int projectId)

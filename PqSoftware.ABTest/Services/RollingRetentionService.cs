@@ -14,14 +14,27 @@ namespace PqSoftware.ABTest.Services
         {
             _context = context;
         }
-        public async Task<double> CalculateRollingRetention(int projectId, DateTime startDate, int days)
+        public async Task<double> CalculateRollingRetention(int projectId, int days, DateTime? startDate)
         {
-            var countRegistered = await _context.ProjectUsers.Where(x => x.ProjectId == projectId && x.DateRegistration <= startDate).CountAsync();
+            DateTime? start = startDate;
+            if (!start.HasValue)
+            {
+                start = await _context.ProjectUsers.Where(x => x.ProjectId == projectId).MinAsync(x => x.DateRegistration);
+                if (!start.HasValue)
+                {
+                    throw new Exception("There are no users");
+                }
+            }
+            var countRegistered = await _context.ProjectUsers.Where(x => x.ProjectId == projectId && x.DateRegistration <= start).CountAsync();
             if (countRegistered == 0)
             {
                 throw new Exception("There are no registered users before given date");
             }
-            var countReturned = await _context.ProjectUsers.Where(x => x.ProjectId == projectId && x.DateLastActivity >= startDate.AddDays(days)).CountAsync();
+            var countReturned = await _context.ProjectUsers
+                .Where(x => x.ProjectId == projectId 
+                        && x.DateRegistration <= start 
+                        && x.DateLastActivity >= start.Value.AddDays(days))
+                .CountAsync();
             double result = (double) countReturned * 100 / countRegistered;
             result = Math.Round(result, 2);
             return result;

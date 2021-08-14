@@ -7,6 +7,6 @@ namespace PqSoftware.ABTest.Services
 {
     public interface IRollingRetentionService
     {
-        Task<double> CalculateRollingRetention(int projectId, DateTime startDate, int days);
+        Task<double> CalculateRollingRetention(int projectId, int days, DateTime? startDate);
     }
 }
