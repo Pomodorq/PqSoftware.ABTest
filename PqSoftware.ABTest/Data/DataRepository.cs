@@ -33,7 +33,7 @@ namespace PqSoftware.ABTest.Data
 
         public async Task<IEnumerable<ProjectUser>> GetProjectUsersByProject(int projectId)
         {
-            return await _context.ProjectUsers.Where(x => x.ProjectId == projectId).AsNoTracking().ToListAsync();
+            return await _context.ProjectUsers.Where(x => x.ProjectId == projectId).Take(1000).AsNoTracking().ToListAsync();
         }
 
         public async Task<ProjectUser> PostProjectUser(ProjectUser user)
