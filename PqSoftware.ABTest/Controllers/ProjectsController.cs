@@ -28,19 +28,26 @@ namespace PqSoftware.ABTest.Controllers
         [HttpGet]
         public async Task<IEnumerable<Project>> GetProjects()
         {
-            var users = await _dataRepository.GetProjects();
-            return users;
+            var projects = await _dataRepository.GetProjects();
+            return projects;
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<Project>> PostProject([FromBody] Project project)
+        {
+            var createdProject = await _dataRepository.PostProject(project);
+            return createdProject;
         }
 
         [HttpGet("{projectId}")]
         public async Task<ActionResult<Project>> GetProject(int projectId)
         {
-            var user = await _dataRepository.GetProject(projectId);
-            if (user == null)
+            var project = await _dataRepository.GetProject(projectId);
+            if (project == null)
             {
                 return NotFound();
             }
-            return user;
+            return project;
         }
 
         [HttpGet("{projectId}/users")]
@@ -59,11 +66,7 @@ namespace PqSoftware.ABTest.Controllers
         public async Task<ActionResult<bool>> GetProjectUserExists(int projectId, int userId)
         {
             var userExist = await _dataRepository.GetProjectUserExists(projectId, userId);
-            if (!userExist)
-            {
-                return false;
-            }
-            return true;
+            return userExist;
         }
 
         [HttpPost("{projectId}/users")]
@@ -91,26 +94,6 @@ namespace PqSoftware.ABTest.Controllers
             return Ok();
         }
 
-        [HttpGet("{projectId}/users/distribution")]
-        public async Task<IEnumerable<LifetimeCount>> GetUsersLifetimeDistribution(int projectId)
-        {
-            return await _usersLifetimeService.GetUsersLifetimeDistributionRaw(projectId);
-        }
-        [HttpGet("{projectId}/users/distribution/interval")]
-        public async Task<IEnumerable<LifetimeIntervalCount>> GetUsersLifetimeDistributionByIntervals(int projectId)
-        {
-            return await _usersLifetimeService.GetUsersLifetimeDistributionByIntervals(projectId);
-        }
-        [HttpGet("{projectId}/users/distribution/range")]
-        public async Task<IEnumerable<LifetimeIntervalCount>> GetUsersLifetimeDistributionByRange(int projectId)
-        {
-            return await _usersLifetimeService.GetUsersLifetimeDistributionByRange(projectId);
-        }
-        [HttpGet("{projectId}/users/rolling-retention")]
-        public async Task<double> GetRollingRetention(int projectId, DateTime? date, int days)
-        {
-            return await _rollingRetentionService.CalculateRollingRetention(projectId, days, date);
-        }
         [HttpDelete("{projectId}/users")]
         public async Task<ActionResult> DeleteProjectUsers(int projectId)
         {
@@ -121,6 +104,30 @@ namespace PqSoftware.ABTest.Controllers
             }
             await _dataRepository.DeleteProjectUsers(projectId);
             return Ok();
+        }
+
+        [HttpGet("{projectId}/users/distribution")]
+        public async Task<IEnumerable<LifetimeCount>> GetUsersLifetimeDistribution(int projectId)
+        {
+            return await _usersLifetimeService.GetUsersLifetimeDistributionRaw(projectId);
+        }
+
+        [HttpGet("{projectId}/users/distribution/interval")]
+        public async Task<IEnumerable<LifetimeIntervalCount>> GetUsersLifetimeDistributionByIntervals(int projectId)
+        {
+            return await _usersLifetimeService.GetUsersLifetimeDistributionByIntervals(projectId, HttpContext);
+        }
+
+        [HttpGet("{projectId}/users/distribution/range")]
+        public async Task<IEnumerable<LifetimeIntervalCount>> GetUsersLifetimeDistributionByRange(int projectId)
+        {
+            return await _usersLifetimeService.GetUsersLifetimeDistributionByRange(projectId);
+        }
+
+        [HttpGet("{projectId}/users/rolling-retention")]
+        public async Task<double> GetRollingRetention(int projectId, DateTime? date, int days)
+        {
+            return await _rollingRetentionService.CalculateRollingRetention(projectId, days, date);
         }
     }
 }
