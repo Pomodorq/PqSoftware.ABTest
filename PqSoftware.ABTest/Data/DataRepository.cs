@@ -21,6 +21,13 @@ namespace PqSoftware.ABTest.Data
             return await _context.Projects.AsNoTracking().ToListAsync();
         }
 
+        public async Task<Project> PostProject(Project project)
+        {
+            _context.Projects.Add(project);
+            await _context.SaveChangesAsync();
+            return project;
+        }
+
         public async Task<Project> GetProject(int id)
         {
             return await _context.Projects.AsNoTracking().FirstOrDefaultAsync(x => x.ProjectId == id);

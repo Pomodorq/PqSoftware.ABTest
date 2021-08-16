@@ -9,6 +9,7 @@ namespace PqSoftware.ABTest.Data
     public interface IDataRepository
     {
         Task<IEnumerable<Project>> GetProjects();
+        Task<Project> PostProject(Project project);
         Task<Project> GetProject(int id);
         Task<bool> GetProjectUserExists(int projectId, int userId);
         Task<IEnumerable<ProjectUser>> GetProjectUsersByProject(int projectId);
