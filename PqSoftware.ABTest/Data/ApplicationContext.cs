@@ -22,7 +22,7 @@ namespace PqSoftware.ABTest.Data
         
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.Entity<LifetimeCount>().HasNoKey();
+            builder.Entity<LifetimeCount>().HasNoKey().ToTable("LifetimeCount", t => t.ExcludeFromMigrations());
             builder.Entity<ProjectUser>().HasAlternateKey(u => new { u.UserId, u.ProjectId });
         }
     }
