@@ -1,9 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using PqSoftware.ABTest.Data;
 using PqSoftware.ABTest.Data.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -27,11 +30,21 @@ namespace PqSoftware.ABTest.Services
                                     "order by lifetime; ", param).ToListAsync();
             return lifetimeCounts;
         }
-        public async Task<IList<LifetimeIntervalCount>> GetUsersLifetimeDistributionByIntervals(int projectId)
+        public async Task<IList<LifetimeIntervalCount>> GetUsersLifetimeDistributionByIntervals(int projectId, HttpContext httpContext)
         {
-            var lifetimeCounts = await GetUsersLifetimeDistributionRaw(projectId);
-            var sumCount = await _context.ProjectUsers.Where(x => x.ProjectId == projectId).CountAsync();
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
 
+            var lifetimeCounts = await GetUsersLifetimeDistributionRaw(projectId);
+
+            stopWatch.Stop();
+            TimeSpan ts = stopWatch.Elapsed;
+            var sumCount = lifetimeCounts.Sum(x => x.Count);
+            httpContext.Response.Headers.Append("Profiler-Info",
+                $"[Server] Get \"raw\" distribution (lifetime:count pairs) from postgres for {sumCount} users={Math.Round(ts.TotalMilliseconds)}");
+
+            stopWatch.Reset();
+            stopWatch.Start();
             var lifetimeIntervalCounts = new List<LifetimeIntervalCount>();
 
             if (lifetimeCounts.Count == 0)
@@ -57,7 +70,9 @@ namespace PqSoftware.ABTest.Services
             for (int i = 0; i < numberOfIntervals; ++i)
             {
                 var left = minLifetime + i * interval;
-                var right = (i == numberOfIntervals - 1) ?
+                var isLast = i == numberOfIntervals - 1;
+                // Для последнего интервала правый конец интервала включен
+                var right = isLast ?
                     Math.Min(left + interval, maxLifetime) :
                     left + interval - 1;
                 
@@ -71,9 +86,17 @@ namespace PqSoftware.ABTest.Services
             foreach (var ltCount in lifetimeCounts)
             {
                 var k = (int)Math.Truncate((double)(ltCount.Lifetime - minLifetime) / interval);
+                // случай когда Lifetime = maxLifetime и range делится нацело на interval
+                // это будет правый конец последнего интервала, который нужно в него включить.
                 if (k == lifetimeIntervalCounts.Count) k--;
                 lifetimeIntervalCounts[k].Count += ltCount.Count;
             }
+
+            stopWatch.Stop();
+            ts = stopWatch.Elapsed;
+            httpContext.Response.Headers.Append("Profiler-Info", 
+                $"[Server] Calculate bar data by intervals for {sumCount} users from " +
+                $"\"raw\" distrbution={ts.TotalMilliseconds.ToString(new CultureInfo("en-US", false))}");
 
             return lifetimeIntervalCounts;
         }

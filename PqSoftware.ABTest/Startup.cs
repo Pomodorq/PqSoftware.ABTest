@@ -23,9 +23,11 @@ namespace PqSoftware.ABTest
 
             services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
                   builder
+                    .WithOrigins(Configuration["AllowedCORS"])
                    .AllowAnyMethod()
                    .AllowAnyHeader()
-                   .WithOrigins(Configuration["AllowedCORS"])));
+                   .WithExposedHeaders("Profiler-Info")
+                  ));
 
             string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<ApplicationContext>(options => options.UseNpgsql(connection));
