@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PqSoftware.ABTest.Data;
 using PqSoftware.ABTest.Services;
+using System;
 
 namespace PqSoftware.ABTest
 {
@@ -29,7 +31,8 @@ namespace PqSoftware.ABTest
                    .WithExposedHeaders("Profiler-Info")
                   ));
 
-            string connection = Configuration.GetConnectionString("DefaultConnection");
+            string connection = Environment.GetEnvironmentVariable("DEFAULT_CONNECTION_3");
+            
             services.AddDbContext<ApplicationContext>(options => options.UseNpgsql(connection));
 
             services.AddScoped<IDataRepository, DataRepository>();
