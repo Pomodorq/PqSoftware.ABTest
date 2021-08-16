@@ -25,7 +25,9 @@ namespace PqSoftware.ABTest.Services
                     throw new Exception("There are no users");
                 }
             }
-            var countRegistered = await _context.ProjectUsers.Where(x => x.ProjectId == projectId && x.DateRegistration <= start).CountAsync();
+            var countRegistered = await _context.ProjectUsers
+                .Where(x => x.ProjectId == projectId && x.DateRegistration <= start)
+                .CountAsync();
             if (countRegistered == 0)
             {
                 throw new Exception("There are no registered users before given date");
