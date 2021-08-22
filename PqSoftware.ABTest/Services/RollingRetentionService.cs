@@ -22,7 +22,7 @@ namespace PqSoftware.ABTest.Services
                 .CountAsync();
             if (countRegistered == 0)
             {
-                throw new Exception("There are no users with appropriate lifetime");
+                throw new LogicException("There are no users with appropriate lifetime");
             }
 
             NpgsqlParameter param = new NpgsqlParameter("@projectId", projectId);
