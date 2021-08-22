@@ -1,3 +1,4 @@
+using Hellang.Middleware.ProblemDetails;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -13,12 +14,15 @@ namespace PqSoftware.ABTest
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public IConfiguration Configuration { get; }
+        private readonly IWebHostEnvironment _env;
+
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+            _env = env;
         }
 
-        public IConfiguration Configuration { get; }
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
@@ -38,15 +42,18 @@ namespace PqSoftware.ABTest
             services.AddScoped<IDataRepository, DataRepository>();
             services.AddTransient<IUsersLifetimeService, UsersLifetimeService>();
             services.AddTransient<IRollingRetentionService, RollingRetentionService>();
+
+            services.AddProblemDetails(setup =>
+            {
+                setup.IncludeExceptionDetails = (ctx, ex) => _env.IsDevelopment() || _env.IsStaging();
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            else
+            app.UseProblemDetails();
+
+            if (!env.IsDevelopment())
             {
                 app.UseHttpsRedirection();
             }
