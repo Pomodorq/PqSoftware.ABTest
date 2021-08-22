@@ -17,12 +17,29 @@ namespace PqSoftware.ABTest.Services
         }
         public async Task<double> CalculateRollingRetention(int projectId, int days)
         {
+            var countLastMoreReg = await _context.ProjectUsers
+                .Where(x => x.ProjectId == projectId && x.DateRegistration > x.DateLastActivity)
+                .CountAsync();
+            if (countLastMoreReg > 0)
+            {
+                throw new LogicException($"There are {countLastMoreReg} users whose Date Registration more than Date Last Activity");
+            }
+
+            var countFuture = await _context.ProjectUsers
+                .Where(x => x.ProjectId == projectId && x.DateLastActivity >= DateTime.UtcNow.Date.AddDays(1))
+                .CountAsync();
+            if (countFuture > 0)
+            {
+                throw new LogicException($"There are {countFuture} users whose Date Last Activity more than today");
+            }
+
             var countRegistered = await _context.ProjectUsers
                 .Where(x => x.ProjectId == projectId && x.DateRegistration <= DateTime.UtcNow.AddDays(-days))
                 .CountAsync();
             if (countRegistered == 0)
             {
-                throw new LogicException("There are no users with appropriate lifetime");
+
+                throw new LogicException($"There are no users registered on {DateTime.UtcNow.Date.AddDays(-days).ToShortDateString()} or before");
             }
 
             NpgsqlParameter param = new NpgsqlParameter("@projectId", projectId);
