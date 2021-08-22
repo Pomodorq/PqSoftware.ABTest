@@ -16,12 +16,12 @@ namespace PqSoftware.ABTest
     public class Startup
     {
         public IConfiguration Configuration { get; }
-        private readonly IWebHostEnvironment _env;
+        private readonly IWebHostEnvironment HostEnvironment;
 
         public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
-            _env = env;
+            HostEnvironment = env;
         }
 
         public void ConfigureServices(IServiceCollection services)
@@ -36,8 +36,10 @@ namespace PqSoftware.ABTest
                    .WithExposedHeaders("Profiler-Info")
                   ));
 
-            string connection = Environment.GetEnvironmentVariable("DEFAULT_CONNECTION_3");
-            
+            string connection = HostEnvironment.IsDevelopment() ? 
+                Configuration.GetConnectionString("DefaultConnection") : 
+                Environment.GetEnvironmentVariable("DEFAULT_CONNECTION_3");
+
             services.AddDbContext<ApplicationContext>(options => options.UseNpgsql(connection));
 
             services.AddScoped<IDataRepository, DataRepository>();
@@ -46,7 +48,7 @@ namespace PqSoftware.ABTest
 
             services.AddProblemDetails(setup =>
             {
-                setup.IncludeExceptionDetails = (ctx, ex) => _env.IsDevelopment() || _env.IsStaging();
+                setup.IncludeExceptionDetails = (ctx, ex) => HostEnvironment.IsDevelopment() || HostEnvironment.IsStaging();
 
                 setup.Map<LogicException>(exception => new ProblemDetails
                 {
