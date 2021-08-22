@@ -39,8 +39,7 @@ namespace PqSoftware.ABTest.Services
                 .CountAsync();
             if (countRegistered == 0)
             {
-
-                throw new LogicException($"There are no users registered on {DateTime.UtcNow.Date.AddDays(-days).ToShortDateString()} or before");
+                throw new LogicException($"There are no users registered on {DateTime.UtcNow.AddDays(-days).ToString("dd.MM.yyyy")} or before");
             }
 
             NpgsqlParameter param = new NpgsqlParameter("@projectId", projectId);
