@@ -125,9 +125,16 @@ namespace PqSoftware.ABTest.Controllers
         }
 
         [HttpGet("{projectId}/users/rolling-retention")]
-        public async Task<double> GetRollingRetention(int projectId, DateTime? date, int days)
+        public async Task<ActionResult<double>> GetRollingRetention(int projectId, int days)
         {
-            return await _rollingRetentionService.CalculateRollingRetention(projectId, days, date);
+            try
+            {
+                return await _rollingRetentionService.CalculateRollingRetention(projectId, days);
+            }
+            catch
+            {
+                return BadRequest();
+            }
         }
     }
 }

@@ -37,7 +37,7 @@ namespace PqSoftware.ABTest
 
             services.AddScoped<IDataRepository, DataRepository>();
             services.AddTransient<IUsersLifetimeService, UsersLifetimeService>();
-            services.AddTransient<IRollingRetentionService, RollingRetentionAllService>();
+            services.AddTransient<IRollingRetentionService, RollingRetentionService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
