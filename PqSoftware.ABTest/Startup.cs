@@ -2,6 +2,7 @@ using Hellang.Middleware.ProblemDetails;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -46,6 +47,14 @@ namespace PqSoftware.ABTest
             services.AddProblemDetails(setup =>
             {
                 setup.IncludeExceptionDetails = (ctx, ex) => _env.IsDevelopment() || _env.IsStaging();
+
+                setup.Map<LogicException>(exception => new ProblemDetails
+                {
+                    Title = exception.Title,
+                    Detail = exception.Detail,
+                    Status = StatusCodes.Status500InternalServerError,
+                    Type = exception.Type,
+                });
             });
         }
 
