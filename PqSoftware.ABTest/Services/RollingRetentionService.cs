@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using PqSoftware.ABTest.Data;
+using PqSoftware.ABTest.Data.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace PqSoftware.ABTest.Services
         {
             _context = context;
         }
-        public async Task<double> CalculateRollingRetention(int projectId, int days)
+        public async Task<RollingRetention> CalculateRollingRetention(int projectId, int days)
         {
             var countLastMoreReg = await _context.ProjectUsers
                 .Where(x => x.ProjectId == projectId && x.DateRegistration > x.DateLastActivity)
@@ -49,7 +50,7 @@ namespace PqSoftware.ABTest.Services
 
             double result = (double)countReturned * 100 / countRegistered;
             result = Math.Round(result, 2);
-            return result;
+            return new RollingRetention(result);
         }
     }
 }
