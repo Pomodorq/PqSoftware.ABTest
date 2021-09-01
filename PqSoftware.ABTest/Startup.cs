@@ -1,3 +1,5 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Hellang.Middleware.ProblemDetails;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -27,7 +29,10 @@ namespace PqSoftware.ABTest
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers()
+                .AddFluentValidation();
+
+            services.AddTransient<IValidator<PostProjectUserRequest>, PostProjectUserRequestValidator>();
 
             services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
                   builder
