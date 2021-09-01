@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using PqSoftware.ABTest.Data.Dto;
 using PqSoftware.ABTest.Data.Models;
@@ -12,9 +13,12 @@ namespace PqSoftware.ABTest.Data
     public class DataRepository : IDataRepository
     {
         private readonly ApplicationContext _context;
-        public DataRepository(ApplicationContext context)
+        private readonly IMapper _mapper;
+
+        public DataRepository(ApplicationContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         public async Task<IEnumerable<Project>> GetProjects()
@@ -46,13 +50,7 @@ namespace PqSoftware.ABTest.Data
 
         public async Task<ProjectUser> PostProjectUser(PostProjectUserRequest user)
         {
-            var projectUser = new ProjectUser()
-            {
-                UserId = user.UserId.Value,
-                ProjectId = user.ProjectId.Value,
-                DateLastActivity = user.DateLastActivity.Value,
-                DateRegistration = user.DateRegistration.Value
-            };
+            var projectUser = _mapper.Map<ProjectUser>(user);
             _context.ProjectUsers.Add(projectUser);
             await _context.SaveChangesAsync();
             return projectUser;
@@ -63,13 +61,7 @@ namespace PqSoftware.ABTest.Data
             var projectUsers = new List<ProjectUser>();
             foreach (var user in users)
             {
-                var projectUser = new ProjectUser()
-                {
-                    UserId = user.UserId.Value,
-                    ProjectId = user.ProjectId.Value,
-                    DateLastActivity = user.DateLastActivity.Value,
-                    DateRegistration = user.DateRegistration.Value
-                };
+                var projectUser = _mapper.Map<ProjectUser>(user);
                 projectUsers.Add(projectUser);
             }
             
