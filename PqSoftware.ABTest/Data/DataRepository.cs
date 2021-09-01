@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using PqSoftware.ABTest.Data.Dto;
 using PqSoftware.ABTest.Data.Models;
 using System;
 using System.Collections.Generic;
@@ -43,18 +44,38 @@ namespace PqSoftware.ABTest.Data
             return await _context.ProjectUsers.Where(x => x.ProjectId == projectId).Take(1000).AsNoTracking().ToListAsync();
         }
 
-        public async Task<ProjectUser> PostProjectUser(ProjectUser user)
+        public async Task<ProjectUser> PostProjectUser(PostProjectUserRequest user)
         {
-            _context.ProjectUsers.Add(user);
+            var projectUser = new ProjectUser()
+            {
+                UserId = user.UserId.Value,
+                ProjectId = user.ProjectId.Value,
+                DateLastActivity = user.DateLastActivity.Value,
+                DateRegistration = user.DateRegistration.Value
+            };
+            _context.ProjectUsers.Add(projectUser);
             await _context.SaveChangesAsync();
-            return user;
+            return projectUser;
         }
 
-        public async Task<IEnumerable<ProjectUser>> PostProjectUsers(IEnumerable<ProjectUser> users)
+        public async Task<IEnumerable<ProjectUser>> PostProjectUsers(IEnumerable<PostProjectUserRequest> users)
         {
-            _context.ProjectUsers.AddRange(users);
+            var projectUsers = new List<ProjectUser>();
+            foreach (var user in users)
+            {
+                var projectUser = new ProjectUser()
+                {
+                    UserId = user.UserId.Value,
+                    ProjectId = user.ProjectId.Value,
+                    DateLastActivity = user.DateLastActivity.Value,
+                    DateRegistration = user.DateRegistration.Value
+                };
+                projectUsers.Add(projectUser);
+            }
+            
+            _context.ProjectUsers.AddRange(projectUsers);
             await _context.SaveChangesAsync();
-            return users;
+            return projectUsers;
         }
 
         public async Task<int> DeleteProjectUsers(int projectId)

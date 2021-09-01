@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PqSoftware.ABTest.Data;
+using PqSoftware.ABTest.Data.Dto;
 using PqSoftware.ABTest.Data.Models;
 using PqSoftware.ABTest.Services;
 using System;
@@ -71,7 +72,7 @@ namespace PqSoftware.ABTest.Controllers
         }
 
         [HttpPost("{projectId}/users")]
-        public async Task<ActionResult<ProjectUser>> PostProjectUser([FromBody] ProjectUser user, [FromRoute] int projectId)
+        public async Task<ActionResult<ProjectUser>> PostProjectUser([FromBody] PostProjectUserRequest user, [FromRoute] int projectId)
         {
             if (user.ProjectId != projectId)
             {
@@ -82,7 +83,7 @@ namespace PqSoftware.ABTest.Controllers
         }
 
         [HttpPost("{projectId}/users/many")]
-        public async Task<ActionResult> PostProjectUsers([FromBody] IEnumerable<ProjectUser> users, [FromRoute] int projectId)
+        public async Task<ActionResult> PostProjectUsers([FromBody] IEnumerable<PostProjectUserRequest> users, [FromRoute] int projectId)
         {
             foreach (var user in users)
             {

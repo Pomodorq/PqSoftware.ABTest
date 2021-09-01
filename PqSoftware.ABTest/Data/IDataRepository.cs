@@ -1,4 +1,5 @@
-﻿using PqSoftware.ABTest.Data.Models;
+﻿using PqSoftware.ABTest.Data.Dto;
+using PqSoftware.ABTest.Data.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,8 +14,8 @@ namespace PqSoftware.ABTest.Data
         Task<Project> GetProject(int id);
         Task<bool> GetProjectUserExists(int projectId, int userId);
         Task<IEnumerable<ProjectUser>> GetProjectUsersByProject(int projectId);
-        Task<ProjectUser> PostProjectUser(ProjectUser user);
-        Task<IEnumerable<ProjectUser>> PostProjectUsers(IEnumerable<ProjectUser> users);
+        Task<ProjectUser> PostProjectUser(PostProjectUserRequest user);
+        Task<IEnumerable<ProjectUser>> PostProjectUsers(IEnumerable<PostProjectUserRequest> users);
         Task<int> DeleteProjectUsers(int projectId);
     }
 }
