@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PqSoftware.ABTest.Data;
+using PqSoftware.ABTest.Data.Dto;
 using PqSoftware.ABTest.Services;
 using System;
 
@@ -58,6 +59,8 @@ namespace PqSoftware.ABTest
                     Type = exception.Type,
                 });
             });
+
+            services.AddAutoMapper(typeof(ProjectProfile));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
